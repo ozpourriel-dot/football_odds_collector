@@ -1,0 +1,32 @@
+name: Test collecteur SportsGameOdds
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Recuperer le depot
+        uses: actions/checkout@v4
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Premier releve reel
+        env:
+          SPORTSGAMEODDS_API_KEY: ${{ secrets.SPORTSGAMEODDS_API_KEY }}
+        run: |
+          python collector.py --limit 5 --daily-cap 1
+      - name: Sauvegarder les archives
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: archive-premier-test
+          path: odds_archive.sqlite
+          if-no-files-found: warn
+          retention-days: 7
